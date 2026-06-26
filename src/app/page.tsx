@@ -39,7 +39,8 @@ export default function Home() {
     if (filterStatus) query = query.eq('status', filterStatus)
     if (filterSite) query = query.eq('site', filterSite)
     if (search) query = query.ilike('title', `%${search}%`)
-    const { data } = await query
+    const { data, error } = await query
+    if (error) console.error('Failed to load epics:', error.message)
     setEpics(data || [])
     setLoading(false)
   }

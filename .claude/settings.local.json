@@ -5,7 +5,12 @@
       "Read(//Users/lisatalbot/.nvm/versions/**)",
       "Bash(brew list *)",
       "Read(//opt/homebrew/lib/**)",
-      "mcp__Claude_Preview__preview_start"
+      "mcp__Claude_Preview__preview_start",
+      "Bash(git commit -m ' *)",
+      "Bash(git remote *)",
+      "WebFetch(domain:wnr-iota.vercel.app)",
+      "Bash(pip3 install *)",
+      "mcp__Claude_in_Chrome__tabs_context_mcp"
     ]
   }
 }
