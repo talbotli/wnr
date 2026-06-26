@@ -89,6 +89,19 @@ export default function EpicDetail({ params }: { params: Promise<{ id: string }>
     loadTasks()
   }
 
+  async function deleteEpic() {
+    if (!confirm('Delete this epic and all its tasks?')) return
+    await supabase.from('epics').delete().eq('id', id)
+    window.location.href = '/'
+  }
+
+  async function deleteTask(taskId: string) {
+    if (!confirm('Delete this task?')) return
+    await supabase.from('tasks').delete().eq('id', taskId)
+    setExpandedTask(null)
+    loadTasks()
+  }
+
   async function toggleTask(task: Task) {
     await supabase.from('tasks').update({ completed: !task.completed }).eq('id', task.id)
     loadTasks()
@@ -164,7 +177,10 @@ export default function EpicDetail({ params }: { params: Promise<{ id: string }>
             <>
               <div className="flex items-start justify-between mb-3">
                 <h2 className="text-2xl font-semibold text-gray-900">{epic.title}</h2>
-                <button onClick={() => setEditing(true)} className="text-sm text-blue-600 hover:text-blue-800">Edit</button>
+                <div className="flex gap-3">
+                  <button onClick={() => setEditing(true)} className="text-sm text-blue-600 hover:text-blue-800">Edit</button>
+                  <button onClick={deleteEpic} className="text-sm text-red-500 hover:text-red-700">Delete</button>
+                </div>
               </div>
               {epic.description && <p className="text-gray-600 text-sm mb-4">{epic.description}</p>}
             </>
@@ -312,12 +328,20 @@ export default function EpicDetail({ params }: { params: Promise<{ id: string }>
                           {task.assignee_email && <span>{task.assignee_email}</span>}
                           {task.due_date && <span>Due: {new Date(task.due_date).toLocaleDateString()}</span>}
                         </div>
-                        <button
-                          onClick={() => { setEditingTask(task.id); setTaskEdit(task) }}
-                          className="text-xs text-blue-600 hover:text-blue-800 mt-2"
-                        >
-                          Edit task
-                        </button>
+                        <div className="flex gap-3 mt-2">
+                          <button
+                            onClick={() => { setEditingTask(task.id); setTaskEdit(task) }}
+                            className="text-xs text-blue-600 hover:text-blue-800"
+                          >
+                            Edit task
+                          </button>
+                          <button
+                            onClick={() => deleteTask(task.id)}
+                            className="text-xs text-red-500 hover:text-red-700"
+                          >
+                            Delete task
+                          </button>
+                        </div>
                       </div>
                     )}
 
