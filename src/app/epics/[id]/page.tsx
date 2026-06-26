@@ -2,7 +2,7 @@
 
 import { useEffect, useState, use } from 'react'
 import { supabase } from '@/lib/supabase'
-import { Epic, Task, Comment, STATUSES, PRIORITIES, SITES, Status } from '@/lib/types'
+import { Epic, Task, Comment, TeamMember, STATUSES, PRIORITIES, SITES, Status } from '@/lib/types'
 import Link from 'next/link'
 
 const STATUS_COLORS: Record<Status, string> = {
@@ -35,6 +35,7 @@ export default function EpicDetail({ params }: { params: Promise<{ id: string }>
   const [commentAuthor, setCommentAuthor] = useState('')
   const [editingTask, setEditingTask] = useState<string | null>(null)
   const [taskEdit, setTaskEdit] = useState<Partial<Task>>({})
+  const [teamMembers, setTeamMembers] = useState<TeamMember[]>([])
 
   async function loadEpic() {
     const { data } = await supabase.from('epics').select('*').eq('id', id).single()
@@ -55,7 +56,12 @@ export default function EpicDetail({ params }: { params: Promise<{ id: string }>
     setComments(prev => ({ ...prev, [taskId]: data || [] }))
   }
 
-  useEffect(() => { loadEpic(); loadTasks() }, [id])
+  async function loadTeamMembers() {
+    const { data } = await supabase.from('team_members').select('*').order('name')
+    setTeamMembers(data || [])
+  }
+
+  useEffect(() => { loadEpic(); loadTasks(); loadTeamMembers() }, [id])
 
   async function updateEpic(updates: Partial<Epic>) {
     if (updates.status && epic && updates.status !== epic.status) {
@@ -273,20 +279,21 @@ export default function EpicDetail({ params }: { params: Promise<{ id: string }>
                           placeholder="Description"
                           rows={2}
                         />
-                        <div className="flex gap-2">
-                          <input
-                            value={taskEdit.assignee_name || ''}
-                            onChange={e => setTaskEdit(prev => ({ ...prev, assignee_name: e.target.value }))}
-                            className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm"
-                            placeholder="Assignee name"
-                          />
-                          <input
-                            value={taskEdit.assignee_email || ''}
-                            onChange={e => setTaskEdit(prev => ({ ...prev, assignee_email: e.target.value }))}
-                            className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm"
-                            placeholder="Assignee email"
-                          />
-                        </div>
+                        <select
+                          value={taskEdit.assignee_email || ''}
+                          onChange={e => {
+                            const member = teamMembers.find(m => m.email === e.target.value)
+                            setTaskEdit(prev => ({
+                              ...prev,
+                              assignee_name: member?.name || null,
+                              assignee_email: e.target.value || null,
+                            }))
+                          }}
+                          className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                        >
+                          <option value="">Unassigned</option>
+                          {teamMembers.map(m => <option key={m.id} value={m.email}>{m.name}</option>)}
+                        </select>
                         <input
                           type="date"
                           value={taskEdit.due_date || ''}
@@ -331,12 +338,14 @@ export default function EpicDetail({ params }: { params: Promise<{ id: string }>
                         </div>
                       )}
                       <div className="flex gap-2">
-                        <input
+                        <select
                           value={commentAuthor}
                           onChange={e => setCommentAuthor(e.target.value)}
-                          placeholder="Your name"
                           className="border border-gray-300 rounded-lg px-2 py-1.5 text-xs w-28"
-                        />
+                        >
+                          <option value="">Who</option>
+                          {teamMembers.map(m => <option key={m.id} value={m.name}>{m.name}</option>)}
+                        </select>
                         <input
                           value={newComment}
                           onChange={e => setNewComment(e.target.value)}

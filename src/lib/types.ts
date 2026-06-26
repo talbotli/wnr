@@ -39,3 +39,9 @@ export interface Comment {
   body: string
   created_at: string
 }
+
+export interface TeamMember {
+  id: string
+  name: string
+  email: string
+}
