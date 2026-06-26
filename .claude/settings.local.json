@@ -4,7 +4,8 @@
       "Bash(npx create-next-app@latest . --typescript --tailwind --eslint --app --src-dir --import-alias \"@/*\" --use-npm)",
       "Read(//Users/lisatalbot/.nvm/versions/**)",
       "Bash(brew list *)",
-      "Read(//opt/homebrew/lib/**)"
+      "Read(//opt/homebrew/lib/**)",
+      "mcp__Claude_Preview__preview_start"
     ]
   }
 }
