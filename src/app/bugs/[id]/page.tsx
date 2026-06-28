@@ -73,7 +73,10 @@ export default function BugDetail({ params }: { params: Promise<{ id: string }> 
       if (!file.type.startsWith('image/')) continue
       const path = `${id}/${Date.now()}-${file.name}`
       const { error } = await supabase.storage.from('bug-screenshots').upload(path, file)
-      if (!error) {
+      if (error) {
+        console.error('Upload failed:', error.message)
+        alert('Upload failed: ' + error.message)
+      } else {
         await supabase.from('bug_screenshots').insert({ bug_id: id, file_path: path })
       }
     }
