@@ -26,7 +26,7 @@ export default function BugsPage() {
   const [showCreate, setShowCreate] = useState(false)
   const [newTitle, setNewTitle] = useState('')
   const [newSite, setNewSite] = useState<Site | ''>('')
-  const [epics, setEpics] = useState<Epic[]>([])
+  const [epics, setEpics] = useState<{ id: string; title: string }[]>([])
 
   async function loadBugs() {
     let query = supabase.from('bugs').select('*').order('created_at', { ascending: false })

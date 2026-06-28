@@ -20,7 +20,7 @@ export default function BugDetail({ params }: { params: Promise<{ id: string }> 
   const { id } = use(params)
   const [bug, setBug] = useState<Bug | null>(null)
   const [screenshots, setScreenshots] = useState<BugScreenshot[]>([])
-  const [epics, setEpics] = useState<Epic[]>([])
+  const [epics, setEpics] = useState<{ id: string; title: string }[]>([])
   const [editing, setEditing] = useState(false)
   const [editTitle, setEditTitle] = useState('')
   const [editDesc, setEditDesc] = useState('')
