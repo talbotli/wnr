@@ -13,6 +13,9 @@ export interface Epic {
   priority: Priority
   status: Status
   site: Site | null
+  assignee_name: string | null
+  assignee_email: string | null
+  due_date: string | null
   position: number
   created_at: string
   updated_at: string

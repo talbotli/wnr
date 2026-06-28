@@ -189,6 +189,12 @@ export default function Home() {
                                 {epic.priority === 'High' ? '▲' : epic.priority === 'Medium' ? '■' : '▼'}
                               </span>
                               <span className="font-medium text-gray-900 flex-1">{epic.title}</span>
+                              {epic.assignee_name && (
+                                <span className="text-xs text-gray-500">{epic.assignee_name}</span>
+                              )}
+                              {epic.due_date && (
+                                <span className="text-xs text-gray-400">{new Date(epic.due_date).toLocaleDateString()}</span>
+                              )}
                               {epic.site && (
                                 <span className="text-xs font-medium px-2 py-0.5 rounded bg-gray-100 text-gray-600">{epic.site}</span>
                               )}

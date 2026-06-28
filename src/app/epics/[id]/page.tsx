@@ -218,6 +218,29 @@ export default function EpicDetail({ params }: { params: Promise<{ id: string }>
                 {SITES.map(s => <option key={s} value={s}>{s}</option>)}
               </select>
             </div>
+            <div>
+              <label className="text-xs text-gray-500 block mb-1">Assignee</label>
+              <select
+                value={epic.assignee_email || ''}
+                onChange={e => {
+                  const member = teamMembers.find(m => m.email === e.target.value)
+                  updateEpic({ assignee_name: member?.name || null, assignee_email: e.target.value || null } as Partial<Epic>)
+                }}
+                className="text-sm border border-gray-300 rounded-lg px-3 py-1.5"
+              >
+                <option value="">Unassigned</option>
+                {teamMembers.map(m => <option key={m.id} value={m.email}>{m.name}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="text-xs text-gray-500 block mb-1">Due date</label>
+              <input
+                type="date"
+                value={epic.due_date || ''}
+                onChange={e => updateEpic({ due_date: e.target.value || null } as Partial<Epic>)}
+                className="text-sm border border-gray-300 rounded-lg px-3 py-1.5"
+              />
+            </div>
             <div className="text-xs text-gray-400 self-end">
               Updated {new Date(epic.updated_at).toLocaleDateString()}
             </div>
