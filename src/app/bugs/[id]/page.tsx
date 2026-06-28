@@ -61,7 +61,7 @@ export default function BugDetail({ params }: { params: Promise<{ id: string }> 
   async function deleteBug() {
     if (!confirm('Delete this bug and all its screenshots?')) return
     for (const s of screenshots) {
-      await supabase.storage.from('bug-screenshots').remove([s.file_path])
+      await supabase.storage.from('wrn').remove([s.file_path])
     }
     await supabase.from('bugs').delete().eq('id', id)
     window.location.href = '/bugs'
@@ -72,7 +72,7 @@ export default function BugDetail({ params }: { params: Promise<{ id: string }> 
     for (const file of Array.from(files)) {
       if (!file.type.startsWith('image/')) continue
       const path = `${id}/${Date.now()}-${file.name}`
-      const { error } = await supabase.storage.from('bug-screenshots').upload(path, file)
+      const { error } = await supabase.storage.from('wrn').upload(path, file)
       if (error) {
         console.error('Upload failed:', error.message)
         alert('Upload failed: ' + error.message)
@@ -85,13 +85,13 @@ export default function BugDetail({ params }: { params: Promise<{ id: string }> 
   }
 
   async function deleteScreenshot(screenshot: BugScreenshot) {
-    await supabase.storage.from('bug-screenshots').remove([screenshot.file_path])
+    await supabase.storage.from('wrn').remove([screenshot.file_path])
     await supabase.from('bug_screenshots').delete().eq('id', screenshot.id)
     loadScreenshots()
   }
 
   function getPublicUrl(path: string) {
-    return supabase.storage.from('bug-screenshots').getPublicUrl(path).data.publicUrl
+    return supabase.storage.from('wrn').getPublicUrl(path).data.publicUrl
   }
 
   const handleDrop = useCallback((e: React.DragEvent) => {
