@@ -10,7 +10,8 @@
       "Bash(git remote *)",
       "WebFetch(domain:wnr-iota.vercel.app)",
       "Bash(pip3 install *)",
-      "mcp__Claude_in_Chrome__tabs_context_mcp"
+      "mcp__Claude_in_Chrome__tabs_context_mcp",
+      "Bash(mkdir -p /Users/lisatalbot/Documents/wnr-pm-app/src/app/bugs/\\\\[id\\\\])"
     ]
   }
 }

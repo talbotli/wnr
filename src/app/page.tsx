@@ -78,7 +78,13 @@ export default function Home() {
     <div className="min-h-screen bg-gray-50">
       <header className="bg-white border-b border-gray-200 px-6 py-4">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
-          <h1 className="text-xl font-semibold text-gray-900">Functionair PM</h1>
+          <div className="flex items-center gap-6">
+            <h1 className="text-xl font-semibold text-gray-900">Functionair PM</h1>
+            <nav className="flex gap-4 text-sm">
+              <span className="text-gray-900 font-medium">Epics</span>
+              <Link href="/bugs" className="text-gray-500 hover:text-gray-900">Bugs</Link>
+            </nav>
+          </div>
           <button
             onClick={() => setShowCreate(true)}
             className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700"

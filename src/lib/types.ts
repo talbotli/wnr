@@ -48,3 +48,21 @@ export interface TeamMember {
   name: string
   email: string
 }
+
+export interface Bug {
+  id: string
+  title: string
+  description: string | null
+  status: Status
+  site: Site | null
+  epic_id: string | null
+  created_at: string
+  updated_at: string
+}
+
+export interface BugScreenshot {
+  id: string
+  bug_id: string
+  file_path: string
+  created_at: string
+}
