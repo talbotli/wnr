@@ -71,7 +71,8 @@ export default function BugDetail({ params }: { params: Promise<{ id: string }> 
     setUploading(true)
     for (const file of Array.from(files)) {
       if (!file.type.startsWith('image/')) continue
-      const path = `${id}/${Date.now()}-${file.name}`
+      const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_')
+      const path = `${id}/${Date.now()}-${safeName}`
       const { error } = await supabase.storage.from('wrn').upload(path, file)
       if (error) {
         console.error('Upload failed:', error.message)
