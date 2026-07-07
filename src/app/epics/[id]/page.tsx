@@ -224,6 +224,15 @@ export default function EpicDetail({ params }: { params: Promise<{ id: string }>
                 value={epic.assignee_email || ''}
                 onChange={e => {
                   const member = teamMembers.find(m => m.email === e.target.value)
+                  if (member && member.email !== epic.assignee_email) {
+                    sendNotification({
+                      type: 'epic_assigned',
+                      to: member.email,
+                      epicTitle: epic.title,
+                      epicId: id,
+                      assigneeName: member.name,
+                    })
+                  }
                   updateEpic({ assignee_name: member?.name || null, assignee_email: e.target.value || null } as Partial<Epic>)
                 }}
                 className="text-sm border border-gray-300 rounded-lg px-3 py-1.5"

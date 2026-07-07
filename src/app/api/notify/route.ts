@@ -8,12 +8,20 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Email not configured' }, { status: 501 })
   }
 
-  const { type, to, epicTitle, taskTitle, assigneeName, newStatus } = await req.json()
+  const { type, to, epicTitle, epicId, taskTitle, assigneeName, newStatus } = await req.json()
 
   let subject = ''
   let html = ''
 
-  if (type === 'task_assigned') {
+  if (type === 'epic_assigned') {
+    subject = `You've been assigned an Epic: ${epicTitle}`
+    html = `
+      <p>Hi ${assigneeName},</p>
+      <p>You've been assigned an epic: <strong>${epicTitle}</strong></p>
+      <p><a href="https://wnr-iota.vercel.app/epics/${epicId}">View epic →</a></p>
+      <p>— Functionair PM</p>
+    `
+  } else if (type === 'task_assigned') {
     subject = `You've been assigned: ${taskTitle}`
     html = `
       <p>Hi ${assigneeName},</p>
