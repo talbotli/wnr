@@ -32,7 +32,7 @@ export async function POST(req: NextRequest) {
   }
 
   const { error } = await resend.emails.send({
-    from: process.env.RESEND_FROM_EMAIL || 'Functionair PM <noreply@resend.dev>',
+    from: process.env.RESEND_FROM_EMAIL || 'Functionair PM <notifications@truenorthpmsolutions.com>',
     to,
     subject,
     html,
