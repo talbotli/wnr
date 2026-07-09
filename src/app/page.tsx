@@ -49,7 +49,8 @@ export default function Home() {
     if (search) query = query.ilike('title', `%${search}%`)
     const { data, error } = await query
     if (error) console.error('Failed to load epics:', error.message)
-    setEpics(data || [])
+    const all = data || []
+    setEpics([...all.filter(e => e.status !== 'Done'), ...all.filter(e => e.status === 'Done')])
     setLoading(false)
   }
 
