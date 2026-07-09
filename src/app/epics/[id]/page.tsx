@@ -14,6 +14,7 @@ const STATUS_COLORS: Record<Status, string> = {
   'Approval': 'bg-pink-100 text-pink-700',
   'Awaiting Release': 'bg-cyan-100 text-cyan-700',
   'Done': 'bg-green-100 text-green-700',
+  "Won't Do": 'bg-gray-200 text-gray-500',
 }
 
 async function sendNotification(payload: Record<string, string>) {

@@ -15,6 +15,7 @@ const STATUS_COLORS: Record<Status, string> = {
   'Approval': 'bg-pink-100 text-pink-700',
   'Awaiting Release': 'bg-cyan-100 text-cyan-700',
   'Done': 'bg-green-100 text-green-700',
+  "Won't Do": 'bg-gray-200 text-gray-500',
 }
 
 const PRIORITY_COLORS: Record<string, string> = {
@@ -50,9 +51,10 @@ export default function Home() {
     const { data, error } = await query
     if (error) console.error('Failed to load epics:', error.message)
     const all = data || []
-    const active = all.filter(e => e.status !== 'Done' && e.priority !== 'Low')
-    const low = all.filter(e => e.status !== 'Done' && e.priority === 'Low')
-    const done = all.filter(e => e.status === 'Done')
+    const inactive = (e: Epic) => e.status === 'Done' || e.status === "Won't Do"
+    const active = all.filter(e => !inactive(e) && e.priority !== 'Low')
+    const low = all.filter(e => !inactive(e) && e.priority === 'Low')
+    const done = all.filter(e => inactive(e))
     setEpics([...active, ...low, ...done])
     setLoading(false)
   }
