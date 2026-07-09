@@ -1,8 +1,8 @@
 export type Priority = 'High' | 'Medium' | 'Low'
-export type Status = 'Backlog' | 'Selected' | 'Requirements' | 'Dev' | 'QA' | 'Approval' | 'Awaiting Release' | 'Done' | "Won't Do"
+export type Status = 'Backlog' | 'Selected' | 'Requirements' | 'Dev' | 'QA' | 'Needs Feedback' | 'Approval' | 'Awaiting Release' | 'Done' | "Won't Do"
 export type Site = 'WNR' | 'ATS'
 
-export const STATUSES: Status[] = ['Backlog', 'Selected', 'Requirements', 'Dev', 'QA', 'Approval', 'Awaiting Release', 'Done', "Won't Do"]
+export const STATUSES: Status[] = ['Backlog', 'Selected', 'Requirements', 'Dev', 'QA', 'Needs Feedback', 'Approval', 'Awaiting Release', 'Done', "Won't Do"]
 export const PRIORITIES: Priority[] = ['High', 'Medium', 'Low']
 export const SITES: Site[] = ['WNR', 'ATS']
 

@@ -11,6 +11,7 @@ const STATUS_COLORS: Record<Status, string> = {
   'Requirements': 'bg-purple-100 text-purple-700',
   'Dev': 'bg-yellow-100 text-yellow-800',
   'QA': 'bg-orange-100 text-orange-700',
+  'Needs Feedback': 'bg-amber-100 text-amber-700',
   'Approval': 'bg-pink-100 text-pink-700',
   'Awaiting Release': 'bg-cyan-100 text-cyan-700',
   'Done': 'bg-green-100 text-green-700',
