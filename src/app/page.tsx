@@ -50,7 +50,10 @@ export default function Home() {
     const { data, error } = await query
     if (error) console.error('Failed to load epics:', error.message)
     const all = data || []
-    setEpics([...all.filter(e => e.status !== 'Done'), ...all.filter(e => e.status === 'Done')])
+    const active = all.filter(e => e.status !== 'Done' && e.priority !== 'Low')
+    const low = all.filter(e => e.status !== 'Done' && e.priority === 'Low')
+    const done = all.filter(e => e.status === 'Done')
+    setEpics([...active, ...low, ...done])
     setLoading(false)
   }
 
