@@ -23,6 +23,12 @@ const PRIORITY_COLORS: Record<string, string> = {
   'Low': 'text-gray-400',
 }
 
+async function persistPositions(ordered: Epic[]) {
+  await Promise.all(ordered.map((epic, i) =>
+    supabase.from('epics').update({ position: i }).eq('id', epic.id)
+  ))
+}
+
 export default function Home() {
   const [epics, setEpics] = useState<Epic[]>([])
   const [loading, setLoading] = useState(true)
@@ -33,9 +39,11 @@ export default function Home() {
   const [newTitle, setNewTitle] = useState('')
   const [newSite, setNewSite] = useState<Site | ''>('')
   const [newPriority, setNewPriority] = useState<'High' | 'Medium' | 'Low'>('Medium')
+  const [editingRank, setEditingRank] = useState<string | null>(null)
+  const [rankInput, setRankInput] = useState('')
 
   async function loadEpics() {
-    let query = supabase.from('epics').select('*').order('position').order('created_at', { ascending: false })
+    let query = supabase.from('epics').select('*').order('position', { nullsFirst: false }).order('created_at', { ascending: false })
     if (filterStatus) query = query.eq('status', filterStatus)
     if (filterSite) query = query.eq('site', filterSite)
     if (search) query = query.ilike('title', `%${search}%`)
@@ -54,6 +62,7 @@ export default function Home() {
       title: newTitle.trim(),
       site: newSite || null,
       priority: newPriority,
+      position: epics.length,
     })
     setNewTitle('')
     setNewSite('')
@@ -68,10 +77,19 @@ export default function Home() {
     const [moved] = reordered.splice(result.source.index, 1)
     reordered.splice(result.destination.index, 0, moved)
     setEpics(reordered)
-    const updates = reordered.map((epic, i) =>
-      supabase.from('epics').update({ position: i }).eq('id', epic.id)
-    )
-    await Promise.all(updates)
+    await persistPositions(reordered)
+  }
+
+  async function applyRankChange(epicId: string, newRank: number) {
+    const fromIndex = epics.findIndex(e => e.id === epicId)
+    const toIndex = Math.max(0, Math.min(newRank - 1, epics.length - 1))
+    setEditingRank(null)
+    if (fromIndex === toIndex) return
+    const reordered = Array.from(epics)
+    const [moved] = reordered.splice(fromIndex, 1)
+    reordered.splice(toIndex, 0, moved)
+    setEpics(reordered)
+    await persistPositions(reordered)
   }
 
   return (
@@ -186,6 +204,33 @@ export default function Home() {
                               className="px-3 py-4 text-gray-300 hover:text-gray-500 cursor-grab active:cursor-grabbing"
                             >
                               ⠿
+                            </div>
+                            {/* Rank number — click to edit */}
+                            <div className="w-8 flex-shrink-0 text-center" onClick={e => e.stopPropagation()}>
+                              {editingRank === epic.id ? (
+                                <input
+                                  type="number"
+                                  value={rankInput}
+                                  min={1}
+                                  max={epics.length}
+                                  onChange={e => setRankInput(e.target.value)}
+                                  onBlur={() => applyRankChange(epic.id, parseInt(rankInput) || index + 1)}
+                                  onKeyDown={e => {
+                                    if (e.key === 'Enter') applyRankChange(epic.id, parseInt(rankInput) || index + 1)
+                                    if (e.key === 'Escape') setEditingRank(null)
+                                  }}
+                                  className="w-8 text-center text-sm border border-blue-400 rounded focus:outline-none"
+                                  autoFocus
+                                />
+                              ) : (
+                                <span
+                                  onClick={() => { setEditingRank(epic.id); setRankInput(String(index + 1)) }}
+                                  className="text-sm font-medium text-gray-400 hover:text-blue-600 cursor-pointer select-none"
+                                  title="Click to change rank"
+                                >
+                                  {index + 1}
+                                </span>
+                              )}
                             </div>
                             <Link
                               href={`/epics/${epic.id}`}
