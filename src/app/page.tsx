@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd'
 import { supabase } from '@/lib/supabase'
 import { Epic, Status, Site, STATUSES, PRIORITIES, SITES } from '@/lib/types'
+import { downloadCsv } from '@/lib/exportCsv'
 import Link from 'next/link'
 
 const STATUS_COLORS: Record<Status, string> = {
@@ -87,6 +88,31 @@ export default function Home() {
     await persistPositions(reordered)
   }
 
+  async function exportAll() {
+    const { data: allEpics } = await supabase.from('epics').select('*').order('position', { nullsFirst: false })
+    const { data: allTasks } = await supabase.from('tasks').select('*').order('position')
+    const { data: allBugs } = await supabase.from('bugs').select('*').order('created_at', { ascending: false })
+    const epicMap = Object.fromEntries((allEpics || []).map(e => [e.id, e.title]))
+    const rows = [
+      ...(allEpics || []).map((e, i) => ({
+        Type: 'Epic', Rank: i + 1, Epic: e.title, Task: '', Status: e.status,
+        Priority: e.priority, Site: e.site || '', Assignee: e.assignee_name || '',
+        'Due Date': e.due_date || '', Completed: '',
+      })),
+      ...(allTasks || []).map(t => ({
+        Type: 'Task', Rank: '', Epic: epicMap[t.epic_id] || '', Task: t.title, Status: '',
+        Priority: '', Site: '', Assignee: t.assignee_name || '',
+        'Due Date': t.due_date || '', Completed: t.completed ? 'Yes' : 'No',
+      })),
+      ...(allBugs || []).map(b => ({
+        Type: 'Bug', Rank: '', Epic: epicMap[b.epic_id] || '', Task: b.title, Status: b.status,
+        Priority: '', Site: b.site || '', Assignee: '',
+        'Due Date': '', Completed: '',
+      })),
+    ]
+    downloadCsv(`functionair-export-${new Date().toISOString().slice(0, 10)}.csv`, rows)
+  }
+
   async function applyRankChange(epicId: string, newRank: number) {
     const fromIndex = epics.findIndex(e => e.id === epicId)
     const toIndex = Math.max(0, Math.min(newRank - 1, epics.length - 1))
@@ -110,12 +136,20 @@ export default function Home() {
               <Link href="/bugs" className="text-gray-500 hover:text-gray-900">Bugs</Link>
             </nav>
           </div>
-          <button
-            onClick={() => setShowCreate(true)}
-            className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700"
-          >
-            + New Epic
-          </button>
+          <div className="flex gap-2">
+            <button
+              onClick={exportAll}
+              className="border border-gray-300 text-gray-600 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-50"
+            >
+              Export CSV
+            </button>
+            <button
+              onClick={() => setShowCreate(true)}
+              className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700"
+            >
+              + New Epic
+            </button>
+          </div>
         </div>
       </header>
 
