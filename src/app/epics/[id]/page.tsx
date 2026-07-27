@@ -35,6 +35,9 @@ export default function EpicDetail({ params }: { params: Promise<{ id: string }>
   const [comments, setComments] = useState<Record<string, Comment[]>>({})
   const [newComment, setNewComment] = useState('')
   const [commentAuthor, setCommentAuthor] = useState('')
+  const [commentLink, setCommentLink] = useState('')
+  const [commentImage, setCommentImage] = useState<File | null>(null)
+  const [uploadingComment, setUploadingComment] = useState(false)
   const [editingTask, setEditingTask] = useState<string | null>(null)
   const [taskEdit, setTaskEdit] = useState<Partial<Task>>({})
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([])
@@ -128,8 +131,25 @@ export default function EpicDetail({ params }: { params: Promise<{ id: string }>
 
   async function addComment(taskId: string) {
     if (!newComment.trim() || !commentAuthor.trim()) return
-    await supabase.from('comments').insert({ task_id: taskId, author: commentAuthor.trim(), body: newComment.trim() })
+    setUploadingComment(true)
+    let image_path: string | null = null
+    if (commentImage) {
+      const safeName = commentImage.name.replace(/[^a-zA-Z0-9._-]/g, '_')
+      const path = `comments/${taskId}/${Date.now()}-${safeName}`
+      const { error } = await supabase.storage.from('wrn').upload(path, commentImage)
+      if (!error) image_path = path
+    }
+    await supabase.from('comments').insert({
+      task_id: taskId,
+      author: commentAuthor.trim(),
+      body: newComment.trim(),
+      image_path,
+      link_url: commentLink.trim() || null,
+    })
     setNewComment('')
+    setCommentLink('')
+    setCommentImage(null)
+    setUploadingComment(false)
     loadComments(taskId)
   }
 
@@ -391,32 +411,69 @@ export default function EpicDetail({ params }: { params: Promise<{ id: string }>
                               <span className="font-medium text-gray-700">{c.author}</span>
                               <span className="text-gray-400 text-xs ml-2">{new Date(c.created_at).toLocaleString()}</span>
                               <p className="text-gray-600 mt-0.5">{c.body}</p>
+                              {c.link_url && (
+                                <a href={c.link_url} target="_blank" rel="noopener noreferrer" className="text-xs text-blue-600 hover:underline block mt-1 break-all">
+                                  {c.link_url}
+                                </a>
+                              )}
+                              {c.image_path && (
+                                <a href={supabase.storage.from('wrn').getPublicUrl(c.image_path).data.publicUrl} target="_blank" rel="noopener noreferrer">
+                                  <img
+                                    src={supabase.storage.from('wrn').getPublicUrl(c.image_path).data.publicUrl}
+                                    alt="Comment attachment"
+                                    className="mt-1 max-h-48 rounded border border-gray-200 cursor-pointer hover:opacity-90"
+                                  />
+                                </a>
+                              )}
                             </div>
                           ))}
                         </div>
                       )}
-                      <div className="flex gap-2">
-                        <select
-                          value={commentAuthor}
-                          onChange={e => setCommentAuthor(e.target.value)}
-                          className="border border-gray-300 rounded-lg px-2 py-1.5 text-xs w-28"
-                        >
-                          <option value="">Who</option>
-                          {teamMembers.map(m => <option key={m.id} value={m.name}>{m.name}</option>)}
-                        </select>
-                        <input
-                          value={newComment}
-                          onChange={e => setNewComment(e.target.value)}
-                          placeholder="Add a comment..."
-                          className="flex-1 border border-gray-300 rounded-lg px-2 py-1.5 text-xs"
-                          onKeyDown={e => { if (e.key === 'Enter') addComment(task.id) }}
-                        />
-                        <button
-                          onClick={() => addComment(task.id)}
-                          className="text-xs text-blue-600 hover:text-blue-800 font-medium"
-                        >
-                          Post
-                        </button>
+                      <div className="space-y-1.5">
+                        <div className="flex gap-2">
+                          <select
+                            value={commentAuthor}
+                            onChange={e => setCommentAuthor(e.target.value)}
+                            className="border border-gray-300 rounded-lg px-2 py-1.5 text-xs w-28"
+                          >
+                            <option value="">Who</option>
+                            {teamMembers.map(m => <option key={m.id} value={m.name}>{m.name}</option>)}
+                          </select>
+                          <input
+                            value={newComment}
+                            onChange={e => setNewComment(e.target.value)}
+                            placeholder="Add a comment..."
+                            className="flex-1 border border-gray-300 rounded-lg px-2 py-1.5 text-xs"
+                            onKeyDown={e => { if (e.key === 'Enter') addComment(task.id) }}
+                          />
+                          <button
+                            onClick={() => addComment(task.id)}
+                            disabled={uploadingComment}
+                            className="text-xs text-blue-600 hover:text-blue-800 font-medium disabled:opacity-50"
+                          >
+                            {uploadingComment ? 'Posting…' : 'Post'}
+                          </button>
+                        </div>
+                        <div className="flex gap-2">
+                          <input
+                            value={commentLink}
+                            onChange={e => setCommentLink(e.target.value)}
+                            placeholder="Paste a link (optional)"
+                            className="flex-1 border border-gray-300 rounded-lg px-2 py-1.5 text-xs"
+                          />
+                          <label className="text-xs text-gray-500 hover:text-gray-700 cursor-pointer border border-gray-300 rounded-lg px-2 py-1.5 whitespace-nowrap">
+                            {commentImage ? commentImage.name.slice(0, 20) + '…' : '📎 Image'}
+                            <input
+                              type="file"
+                              accept="image/*"
+                              className="hidden"
+                              onChange={e => setCommentImage(e.target.files?.[0] || null)}
+                            />
+                          </label>
+                          {commentImage && (
+                            <button onClick={() => setCommentImage(null)} className="text-xs text-red-400 hover:text-red-600">✕</button>
+                          )}
+                        </div>
                       </div>
                     </div>
                   </div>

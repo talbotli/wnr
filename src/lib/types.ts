@@ -40,6 +40,8 @@ export interface Comment {
   task_id: string
   author: string
   body: string
+  image_path: string | null
+  link_url: string | null
   created_at: string
 }
 
